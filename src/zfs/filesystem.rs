@@ -4,6 +4,8 @@
 
 pub struct Filesystem;
 
+use super::snapshot::Snapshot;
+
 impl Filesystem {
 
     pub fn init() -> Filesystem {
@@ -14,6 +16,12 @@ impl Filesystem {
 
     /// Get the snapshot 
     /// 
-    pub fn getSnapshot(&self) {
+    pub fn get_snapshots(&self) -> Vec<Snapshot> {
+        let name = String::from("dummy");
+
+        let s = Snapshot::new(name);
+        let vector = vec![s];
+
+        vector
     }
 }

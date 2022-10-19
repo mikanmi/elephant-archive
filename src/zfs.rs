@@ -3,3 +3,4 @@
 // Elephant Archive is licensed under BSD 2-Clause License.
 
 pub mod filesystem;
+pub mod snapshot;

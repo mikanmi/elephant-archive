@@ -12,13 +12,13 @@ pub struct Snapshot {
 impl Snapshot {
     pub fn new(name: String) -> Snapshot {
         Snapshot {
-            name
+            name,
         }
     }
 }
 
 impl fmt::Display for Snapshot {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "name: {}", self.name)
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(formatter, "name: {}", self.name)
     }
 }

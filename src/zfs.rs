@@ -4,3 +4,6 @@
 
 pub mod filesystem;
 pub mod snapshot;
+
+pub use filesystem::Filesystem;
+pub use snapshot::Snapshot;

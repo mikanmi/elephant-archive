@@ -7,7 +7,7 @@ use log::{error, warn, info, debug, trace};
 mod elephant_logger;
 mod zfs;
 
-use zfs::filesystem::Filesystem;
+use zfs::Filesystem;
 
 fn main() {
 
@@ -32,5 +32,6 @@ fn archive() {
     let filesystem = Filesystem::init();
     let snapshots = filesystem.get_snapshots();
 
-    info!("Snapshots: {}", snapshots[0]);
+    info!("Snapshots: {:?}", snapshots);
+    info!("Snapshots: {:?}", snapshots[0]);
 }

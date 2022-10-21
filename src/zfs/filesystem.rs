@@ -2,26 +2,41 @@
 // All rights reserved.
 // Elephant Archive is licensed under BSD 2-Clause License.
 
-use super::Snapshot;
+use super::{Snapshot, Driver};
 
 pub struct Filesystem {
-    snapshots: Vec<Snapshot>
+    name: String,
+    snapshots: Vec<Snapshot>,
 }
 
 impl Filesystem {
+    pub fn new(name: &str) -> Filesystem {
+        let snaps = Filesystem::assign_snapshots(name);
 
-    pub fn init() -> Filesystem {
-        let snapshots: Vec<Snapshot> = Vec::new();
-        let mut instance = Filesystem {
-            snapshots
+        let instance = Filesystem {
+            name: name.to_string(),
+            snapshots: snaps,
         };
+        instance
+    }
+
+    fn assign_snapshots(filesystem: &str) -> Vec<Snapshot> {
+
+        let driver = Driver::get_instance();
+        let snaps = driver.get_snapshots(&filesystem);
+
+        let mut snapshots: Vec<Snapshot> = Vec::new();
+        let s = Snapshot::new(&snaps[0]);
+        snapshots.push(s);
+
 
         // TODO: add one dummy entry.
-        let name = String::from("dummy");
-        let s = Snapshot::new(name);
-        instance.snapshots.push(s);
+        // let mut snapshots: Vec<Snapshot> = Vec::new();
+        // let name = String::from("dummy");
+        // let s = Snapshot::new(name);
+        // snapshots.push(s);
 
-        instance
+        snapshots
     }
 
     /// Get the snapshot 

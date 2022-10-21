@@ -29,7 +29,9 @@ fn main() {
 }
 
 fn archive() {
-    let filesystem = Filesystem::init();
+    let pool_name = "zfs_pool";
+
+    let filesystem = Filesystem::new(pool_name);
     let snapshots = filesystem.get_snapshots();
 
     info!("Snapshots: {:?}", snapshots);

@@ -11,3 +11,4 @@ Cargo.lock
 
 # macOS
 .DS_Store
+/temporary/

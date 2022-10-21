@@ -18,13 +18,13 @@ impl ElephantLogger {
     /// ```
     pub fn init() -> Result<(), SetLoggerError> {
         log::set_logger(&DEFAULT_LOGGER)
-                .map(|()| log::set_max_level(LevelFilter::Info))
+                .map(|()| log::set_max_level(LevelFilter::Debug))
     }
 }
 
 impl Log for ElephantLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= Level::Info
+        metadata.level() <= Level::Debug
     }
 
     fn log(&self, record: &Record) {

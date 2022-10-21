@@ -10,9 +10,9 @@ pub struct Snapshot {
 }
 
 impl Snapshot {
-    pub fn new(name: String) -> Snapshot {
+    pub fn new(name: &str) -> Snapshot {
         Snapshot {
-            name,
+            name: name.to_string(),
         }
     }
 }

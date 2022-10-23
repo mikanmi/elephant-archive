@@ -2,30 +2,31 @@
 // All rights reserved.
 // Elephant Archive is licensed under BSD 2-Clause License.
 
-use log::{error, warn, info, debug, trace};
-
+mod arguments;
 mod elephant_logger;
 mod zfs;
 
 use zfs::Filesystem;
 
 fn main() {
-
     elephant_logger::ElephantLogger::init().unwrap();
+
+    let cli = arguments::Arguments::get_options();
+
 
     let number = 9;
 
     println!("Hello, world!{}", number);
 
-    error!("log error message");
-    warn!("log warn message");
-    info!("log info message");
-    debug!("log debug message");
-    trace!("log trace message");
+    log::error!("log error message");
+    log::warn!("log warn message");
+    log::info!("log info message");
+    log::debug!("log debug message");
+    log::trace!("log trace message");
 
     archive();
 
-    info!("Finished Elephant Archive.");
+    log::info!("Finished Elephant Archive.");
 }
 
 fn archive() {
@@ -34,6 +35,6 @@ fn archive() {
     let filesystem = Filesystem::new(pool_name);
     let snapshots = filesystem.get_snapshots();
 
-    info!("Snapshots: {:?}", snapshots);
-    info!("Snapshots: {:?}", snapshots[0]);
+    log::info!("Snapshots: {:?}", snapshots);
+    log::info!("Snapshots: {:?}", snapshots[0]);
 }

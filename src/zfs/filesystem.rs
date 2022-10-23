@@ -21,20 +21,11 @@ impl Filesystem {
     }
 
     fn assign_snapshots(filesystem: &str) -> Vec<Snapshot> {
-
         let driver = Driver::get_instance();
-        let snaps = driver.get_snapshots(&filesystem);
+        let snapshot_names = driver.get_snapshots(filesystem);
 
-        let mut snapshots: Vec<Snapshot> = Vec::new();
-        let s = Snapshot::new(&snaps[0]);
-        snapshots.push(s);
-
-
-        // TODO: add one dummy entry.
-        // let mut snapshots: Vec<Snapshot> = Vec::new();
-        // let name = String::from("dummy");
-        // let s = Snapshot::new(name);
-        // snapshots.push(s);
+        let iter = snapshot_names.iter();
+        let snapshots: Vec<Snapshot> = iter.map(|s| Snapshot::new(s)).collect();
 
         snapshots
     }

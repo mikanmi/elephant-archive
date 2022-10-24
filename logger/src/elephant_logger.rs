@@ -4,11 +4,18 @@
 
 use log::{Log, Record, Level, Metadata, SetLoggerError, LevelFilter};
 
-pub struct ElephantLogger;
+pub struct Logger;
 
-static DEFAULT_LOGGER: ElephantLogger = ElephantLogger;
+static DEFAULT_LOGGER: Logger = Logger;
 
-impl ElephantLogger {
+// #[macro_export(local_inner_macros)]
+#[macro_export]
+macro_rules! print_macro {
+    (target: $target:expr, $($arg:tt)+) => (log::log!(target: $target, log::Level::Info, $($arg)+));
+    ($($arg:tt)+) => (log::log!(log::Level::Info, $($arg)+))
+}
+
+impl Logger {
     /// Initialize ElephantLogger 
     /// 
     /// # Examples
@@ -20,9 +27,13 @@ impl ElephantLogger {
         log::set_logger(&DEFAULT_LOGGER)
                 .map(|()| log::set_max_level(LevelFilter::Debug))
     }
+
+    pub fn displayaaa() {
+        print_macro!("bbbbbbb");
+    }
 }
 
-impl Log for ElephantLogger {
+impl Log for Logger {
     fn enabled(&self, metadata: &Metadata) -> bool {
         metadata.level() <= Level::Debug
     }

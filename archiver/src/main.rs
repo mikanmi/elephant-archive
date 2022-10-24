@@ -3,13 +3,13 @@
 // Elephant Archive is licensed under BSD 2-Clause License.
 
 mod arguments;
-mod elephant_logger;
 mod zfs;
 
 use zfs::Filesystem;
+use elephant_logger::Logger;
 
 fn main() {
-    elephant_logger::ElephantLogger::init().unwrap();
+    Logger::init().unwrap();
 
     let cli = arguments::Arguments::get_options();
 
@@ -23,6 +23,11 @@ fn main() {
     log::info!("log info message");
     log::debug!("log debug message");
     log::trace!("log trace message");
+    Logger::displayaaa();
+
+    elephant_logger::print_macro!("AAAAAAAA");
+
+    print!("AAAAAA");
 
     archive();
 

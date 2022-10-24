@@ -60,11 +60,15 @@ pub enum Commands {
         #[arg(short, long)]
         list: bool,
     },
-    /// TODO: implementation
+    /// Show the existing snapshots on a ZFS filesystem.
     ListSnapshot {
-        /// lists test values
-        #[arg(short, long)]
-        list: bool,
+
+        /// The names of one or more ZFS filesystems.
+        filesystem: Vec<String>,
+
+        /// Turn debugging information on
+        #[arg(short, long, action = clap::ArgAction::Count)]
+        debug: u8,
     },
 }
 

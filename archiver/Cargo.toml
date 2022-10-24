@@ -1,0 +1,12 @@
+[package]
+name = "elephant-archiver"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+
+[dependencies]
+elephant_logger = { path = "../logger" }
+
+log.workspace = true
+clap = { workspace = true, features = ["derive"] }

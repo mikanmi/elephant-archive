@@ -1,5 +1,14 @@
-[package]
-name = "elephant-archive"
+[workspace]
+members = [
+    "archiver",
+    "logger",
+]
+default-members = [
+    "archiver",
+    "logger",
+]
+
+[workspace.package]
 version = "0.1.0"
 edition = "2021"
 authors = ["Patineboot <patine@patineboot.com>"]
@@ -7,6 +16,6 @@ description = "Elephant Archive is a great CLI archiver."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[workspace.dependencies]
 log = "0.4"
-clap = {version="4.0", features = ["derive"]}
+clap = { version="4.0", features = ["derive"] }

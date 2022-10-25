@@ -1,3 +1,9 @@
-mod elephant_logger;
+// Copyright (c) 2022 Patineboot.
+// All rights reserved.
+// Elephant Archive is licensed under BSD 2-Clause License.
 
-pub use elephant_logger::Logger;
+mod elephant_log;
+
+pub use elephant_log::Logger;
+pub use elephant_log::Level;
+pub use elephant_log::Attribute;

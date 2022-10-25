@@ -6,32 +6,24 @@ mod arguments;
 mod zfs;
 
 use zfs::Filesystem;
-use elephant_logger::Logger;
 
 fn main() {
-    Logger::init().unwrap();
+
+    elephant_log::Logger::init(elephant_log::Level::Info);
+
 
     let cli = arguments::Arguments::get_options();
 
-
-    let number = 9;
-
-    println!("Hello, world!{}", number);
-
-    log::error!("log error message");
-    log::warn!("log warn message");
-    log::info!("log info message");
-    log::debug!("log debug message");
-    log::trace!("log trace message");
-    Logger::displayaaa();
-
-    elephant_logger::print_macro!("AAAAAAAA");
-
-    print!("AAAAAA");
+    elephant_log::error!("log error message");
+    elephant_log::warn!("log warn message");
+    elephant_log::info!("log info message");
+    elephant_log::debug!("log debug message");
+    elephant_log::trace!("log trace message");
+    elephant_log::display!("log display message");
 
     archive();
 
-    log::info!("Finished Elephant Archive.");
+    elephant_log::display!("Finished Elephant Archive.");
 }
 
 fn archive() {
@@ -40,6 +32,5 @@ fn archive() {
     let filesystem = Filesystem::new(pool_name);
     let snapshots = filesystem.get_snapshots();
 
-    log::info!("Snapshots: {:?}", snapshots);
-    log::info!("Snapshots: {:?}", snapshots[0]);
+    elephant_log::info!("Snapshots: {:?}", snapshots);
 }

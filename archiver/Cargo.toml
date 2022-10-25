@@ -1,12 +1,11 @@
 [package]
-name = "elephant-archiver"
+name = "elephant-archive"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 description.workspace = true
 
 [dependencies]
-elephant_logger = { path = "../logger" }
+elephant_log = { path = "../logger" }
 
-log.workspace = true
-clap = { workspace = true, features = ["derive"] }
+clap = { version="4.0", features = ["derive"] }

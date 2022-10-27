@@ -2,40 +2,33 @@
 // All rights reserved.
 // Elephant Archive is licensed under BSD 2-Clause License.
 
-use std::path::PathBuf;
+// use std::path::PathBuf;
 
+use once_cell::sync::OnceCell;
 use clap::{Parser, Subcommand};
 
-pub struct Arguments;
-
-impl Arguments {
-    pub fn get_options() -> String {
-        let cli = Cli::parse();
-
-        String::from("aaa")
-    }
-}
-
+#[derive(Debug)]
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
-struct Cli {
+pub struct Arguments {
     /// Optional name to operate on
-    name: Option<String>,
+    // pub name: Option<String>,
 
     /// Sets a custom config file
-    #[arg(short, long, value_name = "FILE")]
-    config: Option<PathBuf>,
+    // #[arg(short, long, value_name = "FILE")]
+    // pub config: Option<PathBuf>,
 
     /// Turn debugging information on
-    #[arg(short, long, action = clap::ArgAction::Count)]
-    debug: u8,
+    // #[arg(short, long, action = clap::ArgAction::Count)]
+    // pub debug: u8,
 
     #[command(subcommand)]
-    command: Option<Commands>,
+    pub command: Command,
 }
 
+#[derive(Debug)]
 #[derive(Subcommand)]
-pub enum Commands {
+pub enum Command {
     /// TODO: implementation
     Archive {
         /// lists test values
@@ -62,13 +55,34 @@ pub enum Commands {
     },
     /// Show the existing snapshots on a ZFS filesystem.
     ListSnapshot {
-
         /// The names of one or more ZFS filesystems.
         filesystem: Vec<String>,
 
         /// Turn debugging information on
         #[arg(short, long, action = clap::ArgAction::Count)]
-        debug: u8,
+        verbose: u8,
+
+        /// Turn debugging information on
+        #[arg(short, long, action = clap::ArgAction::Count)]
+        dryrun: u8,
     },
 }
+
+
+static INSTANCE: OnceCell<Arguments> = OnceCell::new();
+
+impl Arguments {
+    pub fn global() -> &'static Arguments {
+        let instance = INSTANCE.get_or_init(|| Arguments::new());
+
+        instance
+    }
+
+    pub fn new() -> Arguments {
+        let args = Arguments::parse();
+
+        args
+    }
+}
+
 

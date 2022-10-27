@@ -13,3 +13,4 @@ authors = ["Patineboot <patine@patineboot.com>"]
 description = "Elephant Archive is a great CLI archiver."
 
 [workspace.dependencies]
+once_cell = "1.15.0"

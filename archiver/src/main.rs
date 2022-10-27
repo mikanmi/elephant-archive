@@ -6,13 +6,20 @@ mod arguments;
 mod zfs;
 
 use zfs::Filesystem;
+use arguments::{Arguments, Command};
 
 fn main() {
 
-    elephant_log::Logger::init(elephant_log::Level::Info);
+    elephant_log::Logger::init(elephant_log::Level::Trace);
+    let args = Arguments::global();
+    let command = &args.command;
 
-
-    let cli = arguments::Arguments::get_options();
+    match command {
+        Command::ListSnapshot { .. } => {
+            archive()
+        }
+        _ => elephant_log::error!("Not Implemented yet"),
+    }
 
     elephant_log::error!("log error message");
     elephant_log::warn!("log warn message");

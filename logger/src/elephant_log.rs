@@ -2,6 +2,10 @@
 // All rights reserved.
 // Elephant Archive is licensed under BSD 2-Clause License.
 
+use once_cell::sync::OnceCell;
+use chrono::Local;
+
+#[derive(Debug)]
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub enum Level {
     None = 1,
@@ -19,6 +23,7 @@ pub struct Attribute {
     line: u32,
 }
 
+#[derive(Debug)]
 pub struct Logger {
     log_level: Level,
 }
@@ -107,21 +112,19 @@ impl Attribute {
     }
 }
 
-static mut DEFAULT_LOGGER: Logger = Logger{ log_level: Level::Trace };
+static DEFAULT_LOGGER: OnceCell<Logger> = OnceCell::new();
 
 impl Logger {
 
     pub fn init(level: Level) {
-        unsafe {
-            DEFAULT_LOGGER.set_level(level);
-        }
+        let logger = Logger {
+            log_level: level,
+        };
+        DEFAULT_LOGGER.set(logger).unwrap();
     }
 
     pub fn log(message: String, attribute: Attribute) {
-        let logger;
-        unsafe {
-            logger = &DEFAULT_LOGGER;
-        }
+        let logger = DEFAULT_LOGGER.get().unwrap();
 
         if attribute.level > logger.log_level {
             return;
@@ -137,7 +140,9 @@ impl Logger {
             Level::None => "NON",
         };
 
-        println!("[{}]{}:{} {}", level, attribute.file, attribute.line, message);
+        let datetime = Local::now().format("%FT%T%.3f");
+
+        println!("[{}][{}]{}:{} {}", datetime, level, attribute.file, attribute.line, message);
     }
 
     pub fn set_level(&mut self, level: Level) {

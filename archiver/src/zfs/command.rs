@@ -8,6 +8,10 @@ pub struct Driver;
 
 static DRIVER_INSTANCE: Driver = Driver;
 
+/// Command Line: show ZFS filesystems on this machine.
+const ZFS_LIST_FILESYSTEM: &str = "zfs list -H -o name -t filesystem";
+
+/// Command Line: show snapshots on ZFS filesystems on this machine.
 const ZFS_LIST_SNAPSHOT: &str = "zfs list -H -s creation -o name -t snapshot";
 
 impl Driver {
@@ -15,6 +19,23 @@ impl Driver {
         &DRIVER_INSTANCE
     }
 
+    /// Get all of the snapshots on this machine.
+    pub fn get_filesystems(&self) -> Vec<String> {
+        let cl = format!("{ZFS_LIST_FILESYSTEM}");
+        let stdout = self.spawn(&cl);
+
+        let lines = stdout.lines();
+        let filesystems = lines.map(|s| s.to_string()).collect();
+
+        filesystems
+    }
+
+    /// Get all of the snapshots on the `filesystem` ZFS filesystem.
+    // pub fn get_filesystems(&self, filesystem: &str) -> Vec<String> {
+
+    // }
+
+    /// Get all of the snapshots on the `filesystem` ZFS filesystem.
     pub fn get_snapshots(&self, filesystem: &str) -> Vec<String> {
 
         let cl = format!("{ZFS_LIST_SNAPSHOT} {filesystem}");

@@ -8,14 +8,9 @@ use once_cell::sync::OnceCell;
 
 use super::{Snapshot, Driver};
 
-pub struct Filesystem {
-    name: String,
-    snapshots: Vec<Snapshot>,
-}
-
 struct FilesystemAttribute {
-    pools: Vec<String>,
     filesystems: Vec<String>,
+    snapshots: Vec<String>,
 }
 
 static ATTRIBUTE_INSTANCE: OnceCell<FilesystemAttribute> = OnceCell::new();
@@ -27,36 +22,42 @@ impl FilesystemAttribute {
 
     fn new() -> FilesystemAttribute {
         let driver = Driver::get_instance();
+
         let filesystem_names = driver.get_filesystems();
-
-        // let iter = filesystem_names.iter();
-        // let filesystems: Vec<Snapshot> = iter.map(|s| Filesystem::new(s)).collect();
-
-        // let pools_name = filesystem_names.into_iter().filter
-        //         (|x| !x.contains("/")).collect();
-        let pools_name = vec!["dummy".to_string()];
+        let snapshot_names = driver.get_snapshots();
 
         FilesystemAttribute {
-            pools: pools_name,
             filesystems: filesystem_names,
+            snapshots: snapshot_names,
         }
+    }
+
+    fn get_snapshots(&self, name: &str) -> Vec<String> {
+        let snapshots = self.snapshots.clone();
+
+        // filter `snapshots` with starting `name`.
+        let into_iter = snapshots.into_iter();
+        let filtered: Vec<String> = into_iter.filter(|x| x.starts_with(name)).collect();
+
+        filtered
     }
 }
 
-struct SnapshotCache {
-    filesystems: HashMap<String, Vec<Snapshot>>,
+pub struct Filesystem {
+    name: String,
+    snapshots: Vec<Snapshot>,
 }
 
-static CACHE_INSTANCE: OnceCell<Mutex<SnapshotCache>> = OnceCell::new();
-
-
 impl Filesystem {
+
+    /// Confirm the `name` ZFS filesystem exists or not.
     pub fn exist(name: &str) -> bool {
         let attribute = FilesystemAttribute::global();
 
         attribute.filesystems.contains(&name.to_string())
     }
 
+    /// Make a ZFS filesystem instance from `name`.
     pub fn from(name: &str) -> Result<Filesystem, String> {
         if !Self::exist(name) {
             let message = format!("'{}' filesystem is not exist on this machine.", name);
@@ -67,17 +68,13 @@ impl Filesystem {
         Ok(Self::new(name))
     }
 
-    pub fn get_pools() -> Vec<Filesystem> {
-        let attribute = FilesystemAttribute::global();
-
-        let iter = attribute.pools.iter();
-        let pools: Vec<Filesystem> = iter.map(|s| Filesystem::new(s)).collect();
-
-        pools
-    }
-
+    /// Create a ZFS filesystem instance from `name`.
     fn new(name: &str) -> Filesystem {
-        let snapshots = Filesystem::assign_snapshots(name);
+        let attribute = FilesystemAttribute::global();
+        let snapshot_names = attribute.get_snapshots(name);
+
+        let iter = snapshot_names.iter();
+        let snapshots: Vec<Snapshot> = iter.map(|s| Snapshot::new(s)).collect();
 
         let instance = Filesystem {
             name: name.to_string(),
@@ -86,17 +83,6 @@ impl Filesystem {
 
         instance
     }
-
-    fn assign_snapshots(filesystem: &str) -> Vec<Snapshot> {
-        let driver = Driver::get_instance();
-        let snapshot_names = driver.get_snapshots(filesystem);
-
-        let iter = snapshot_names.iter();
-        let snapshots: Vec<Snapshot> = iter.map(|s| Snapshot::new(s)).collect();
-
-        snapshots
-    }
-
 
     /// Get the snapshot 
     /// 

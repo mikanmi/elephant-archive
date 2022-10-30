@@ -9,13 +9,29 @@ pub struct ListSnapshotCommand;
 
 pub trait SubCommand {
 
-    fn accessibleFilesystem(&self) -> Result<(), String> {
-        Err(String::from("SubCommand::accessibleFilesystem called"))
+    /// Confirm the ZFS filesystems of the command options are accessible or not.
+    fn accessible_filesystem(&self) -> Result<(), String> {
+        let args = Argument::global();
+        let filesystems = &args.filesystem;
+
+        let f = filesystems.iter().find(|x|!Filesystem::exist(x));
+        let result = match f {
+            Some(filesystem) => Err(format!("The '{filesystem}' ZFS filesystem is not found")),
+            None => Ok(()),
+        };
+
+        result
+    }
+
+    fn launch(&self) -> Result<(), String> {
+        self.accessible_filesystem()?;
+        self.run()?;
+
+        Ok(())
     }
 
     fn run(&self) -> Result<(), String> {
         elephant_log::error!("SubCommand::run called");
-
         Err(String::from("SubCommand::run called"))
     }
 }
@@ -40,6 +56,7 @@ impl SubCommand for ListSnapshotCommand {
         let args = Argument::global();
         let filesystems = &args.filesystem;
 
+        // display the snapshots every the filesystem.
         for filesystem in filesystems {
             let filesystem = Filesystem::from(filesystem)?;
             let snapshots = filesystem.get_snapshots();

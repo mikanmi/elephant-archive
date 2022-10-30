@@ -16,7 +16,12 @@ fn main() {
     let command = &args.command;
 
     let subcommand = subcommand::from(command);
-    subcommand.run().unwrap();
+    let result = subcommand.launch();
+
+    match result {
+        Ok(()) => elephant_log::display!("Finished Elephant Archive."),
+        Err(message) => elephant_log::error!("Error occurs {message}"),
+    }
 
     elephant_log::error!("log error message");
     elephant_log::warn!("log warn message");

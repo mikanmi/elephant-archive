@@ -2,8 +2,6 @@
 // All rights reserved.
 // Elephant Archive is licensed under BSD 2-Clause License.
 
-use std::{sync::Mutex, collections::HashMap};
-
 use once_cell::sync::OnceCell;
 
 use super::{Snapshot, Driver};
@@ -32,15 +30,21 @@ impl FilesystemAttribute {
         }
     }
 
-    fn get_snapshots(&self, name: &str) -> Vec<String> {
+    fn get_snapshots(&self, filesystem: &str) -> Vec<String> {
         let snapshots = self.snapshots.clone();
 
         // filter `snapshots` with starting `name`.
         let into_iter = snapshots.into_iter();
-        let filtered: Vec<String> = into_iter.filter(|x| x.starts_with(name)).collect();
+        let filtered: Vec<String> = into_iter.filter(|x| x.starts_with(filesystem)).collect();
 
         filtered
     }
+
+    fn add(&self, snapshot: &str) {
+        let mut snapshots = self.snapshots.clone();
+        snapshots.push(snapshot.to_string());
+    }
+
 }
 
 pub struct Filesystem {
@@ -84,9 +88,21 @@ impl Filesystem {
         instance
     }
 
-    /// Get the snapshot 
-    /// 
+    /// Get the snapshots
     pub fn get_snapshots(&self) -> &Vec<Snapshot> {
         &self.snapshots
     }
+
+    /// Get the snapshots
+    pub fn take_snapshot(&self) -> Snapshot {
+        let driver = Driver::get_instance();
+        let name = Snapshot::generate_name(&self.name);
+        driver.take_snapshot(&name);
+
+        let attr = FilesystemAttribute::global();
+        attr.add(&name);
+
+        Snapshot::new(&name)
+    }
+
 }

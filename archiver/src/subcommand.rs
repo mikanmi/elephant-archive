@@ -5,6 +5,7 @@
 use crate::argument::{Argument, Command};
 use crate::zfs::Filesystem;
 
+pub struct SnapshotCommand;
 pub struct ListSnapshotCommand;
 
 pub trait SubCommand {
@@ -38,9 +39,14 @@ pub trait SubCommand {
 
 pub fn from(command: &Command) -> Box<dyn SubCommand> {
 
-    let subcommand = match command {
+    elephant_log::error!("{:?}", command);
+
+    let subcommand: Box<dyn SubCommand> = match command {
+        Command::Snapshot { .. } => {
+            Box::new( SnapshotCommand {} )
+        },
         Command::ListSnapshot { .. } => {
-            Box::new(ListSnapshotCommand {})
+            Box::new( ListSnapshotCommand {} )
         },
         _ => { elephant_log::error!("Not Implemented yet"); panic!() },
     };
@@ -48,6 +54,24 @@ pub fn from(command: &Command) -> Box<dyn SubCommand> {
     subcommand
 }
 
+impl SubCommand for SnapshotCommand {
+
+    fn run(&self) -> Result<(), String> {
+
+        let args = Argument::global();
+        let filesystems = &args.filesystem;
+
+        // display the snapshots every the filesystem.
+        for filesystem in filesystems {
+            let filesystem = Filesystem::from(filesystem)?;
+            let snapshot = filesystem.take_snapshot();
+
+            elephant_log::display!("Taken a snapshot: {}", snapshot.name());
+        }
+
+        Ok(())
+    }
+}
 
 impl SubCommand for ListSnapshotCommand {
 
@@ -61,7 +85,7 @@ impl SubCommand for ListSnapshotCommand {
             let filesystem = Filesystem::from(filesystem)?;
             let snapshots = filesystem.get_snapshots();
 
-            elephant_log::info!("Snapshots: {:?}", snapshots);
+            elephant_log::display!("Snapshots: {:?}", snapshots);
         }
 
         Ok(())

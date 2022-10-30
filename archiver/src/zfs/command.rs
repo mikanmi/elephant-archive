@@ -14,6 +14,10 @@ const ZFS_LIST_FILESYSTEM: &str = "zfs list -H -o name -t filesystem";
 /// Command Line: show snapshots on this machine.
 const ZFS_LIST_SNAPSHOT: &str = "zfs list -H -s creation -o name -t snapshot";
 
+/// Command Line: take a snapshot on a ZFS filesystem.
+const ZFS_TAKE_SNAPSHOT: &str = "zfs snapshot -r";
+
+
 impl Driver {
     pub fn get_instance() -> &'static Driver {
         &DRIVER_INSTANCE
@@ -41,11 +45,18 @@ impl Driver {
         snapshots
     }
 
+    /// Take the snapshot named with `snapshot`.
+    /// `take_snapshot` function must be called by the root user.
+    pub fn take_snapshot(&self, snapshot: &str) {
+        let cl = format!("{ZFS_TAKE_SNAPSHOT} {snapshot}");
+        self.spawn(&cl);
+    }
+
     /// Execute a command line involving a program and arguments.
     /// `command_line` is a command line with a program followed 
     /// by arguments separated with whitespace.
     fn spawn(&self, command_line: &str) -> String {
-        elephant_log::debug!("spawn: {command_line}");
+        elephant_log::info!("spawn: {command_line}");
 
         let mut split = command_line.split_whitespace();
         let program = split.next().unwrap();
@@ -59,18 +70,18 @@ impl Driver {
         command.stdin(Stdio::null());
         command.stderr(Stdio::piped());
         command.stdout(Stdio::piped());
-        
-        let child = command.spawn().expect("failed to execute child");
+
+        let child = command.spawn().expect("Failed to execute child");
         let output = child.wait_with_output().expect("Failed to wait on child");
         if !output.status.success() {
-            elephant_log::error!("Spawn: {command_line}");
-            match output.status.code() {
-                Some(code) => elephant_log::error!("Exited with status code: {code}"),
-                None            => elephant_log::error!("Process terminated by signal"),
-            }
+            let exit = match output.status.code() {
+                Some(code) => format!("Exited with status code: {code}"),
+                None            => format!("Process terminated by signal"),
+            };
             let stderr = String::from_utf8(output.stderr).unwrap();
-            elephant_log::error!("Error messages is the following ===>");
-            elephant_log::error!("{stderr}");
+
+            elephant_log::error!("{exit}, See more details =====>");
+            elephant_log::error!("Command Line: '{command_line}', stderr is on the next line:\n{stderr}");
             panic!();
         }
 

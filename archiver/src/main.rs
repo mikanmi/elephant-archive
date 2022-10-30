@@ -2,6 +2,7 @@
 // All rights reserved.
 // Elephant Archive is licensed under BSD 2-Clause License.
 
+mod configure;
 mod argument;
 mod subcommand;
 mod zfs;

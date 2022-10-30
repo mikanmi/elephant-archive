@@ -9,4 +9,5 @@ description.workspace = true
 elephant_log = { path = "../logger" }
 
 once_cell.workspace = true
+chrono.workspace = true
 clap = { version="4.0", features = ["derive"] }

@@ -102,6 +102,14 @@ impl Argument {
         println!("{:?}", program);
 
         let argument = match &program.command {
+            Command::Snapshot { filesystem, verbose, dryrun } => {
+                Argument {
+                    command: program.command.clone(),
+                    filesystem: filesystem.clone(),
+                    verbose: verbose.clone(),
+                    dryrun: dryrun.clone(),
+                }
+            },
             Command::ListSnapshot { filesystem, verbose, dryrun } => {
                 Argument {
                     command: program.command.clone(),

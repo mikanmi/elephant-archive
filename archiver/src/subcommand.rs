@@ -6,7 +6,7 @@ use crate::argument::{Argument, Command};
 use crate::zfs::Filesystem;
 
 pub struct SnapshotCommand;
-pub struct ListSnapshotCommand;
+pub struct ShowCommand;
 
 pub trait SubCommand {
 
@@ -45,8 +45,8 @@ pub fn from(command: &Command) -> Box<dyn SubCommand> {
         Command::Snapshot { .. } => {
             Box::new( SnapshotCommand {} )
         },
-        Command::ListSnapshot { .. } => {
-            Box::new( ListSnapshotCommand {} )
+        Command::Show { .. } => {
+            Box::new( ShowCommand {} )
         },
         _ => { elephant_log::error!("Not Implemented yet"); panic!() },
     };
@@ -54,17 +54,27 @@ pub fn from(command: &Command) -> Box<dyn SubCommand> {
     subcommand
 }
 
+impl SnapshotCommand {
+    fn purge(&self, filesystem: Filesystem) -> Result<(), String> {
+        let memory = filesystem.get_memory();
+
+        Ok(())
+    }
+}
+
 impl SubCommand for SnapshotCommand {
 
     fn run(&self) -> Result<(), String> {
 
         let args = Argument::global();
-        let filesystems = &args.filesystem;
+        let fs_names = &args.filesystem;
 
         // display the snapshots every the filesystem.
-        for filesystem in filesystems {
-            let filesystem = Filesystem::from(filesystem)?;
+        for fs_name in fs_names {
+            let filesystem = Filesystem::from(fs_name)?;
             let snapshot = filesystem.take_snapshot();
+
+            self.purge(filesystem)?;
 
             elephant_log::display!("Taken a snapshot: {}", snapshot.name());
         }
@@ -73,7 +83,7 @@ impl SubCommand for SnapshotCommand {
     }
 }
 
-impl SubCommand for ListSnapshotCommand {
+impl SubCommand for ShowCommand {
 
     fn run(&self) -> Result<(), String> {
 
@@ -83,7 +93,7 @@ impl SubCommand for ListSnapshotCommand {
         // display the snapshots every the filesystem.
         for filesystem in filesystems {
             let filesystem = Filesystem::from(filesystem)?;
-            let snapshots = filesystem.get_snapshots();
+            let snapshots = filesystem.get_memory();
 
             elephant_log::display!("Snapshots: {:?}", snapshots);
         }

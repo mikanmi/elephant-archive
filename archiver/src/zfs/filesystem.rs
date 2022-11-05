@@ -4,7 +4,7 @@
 
 use once_cell::sync::OnceCell;
 
-use super::{Snapshot, Driver};
+use super::{SnapshotMemory, Snapshot, Driver};
 
 struct FilesystemAttribute {
     filesystems: Vec<String>,
@@ -45,11 +45,15 @@ impl FilesystemAttribute {
         snapshots.push(snapshot.to_string());
     }
 
+    fn exist(&self, filesystem: &str) -> bool {
+        self.filesystems.contains(&filesystem.to_string())
+    }
+
 }
 
 pub struct Filesystem {
     name: String,
-    snapshots: Vec<Snapshot>,
+    memory: SnapshotMemory,
 }
 
 impl Filesystem {
@@ -58,7 +62,7 @@ impl Filesystem {
     pub fn exist(name: &str) -> bool {
         let attribute = FilesystemAttribute::global();
 
-        attribute.filesystems.contains(&name.to_string())
+        attribute.exist(name)
     }
 
     /// Make a ZFS filesystem instance from `name`.
@@ -79,18 +83,23 @@ impl Filesystem {
 
         let iter = snapshot_names.iter();
         let snapshots: Vec<Snapshot> = iter.map(|s| Snapshot::new(s)).collect();
+        let memory = SnapshotMemory::new(snapshots);
 
         let instance = Filesystem {
             name: name.to_string(),
-            snapshots,
+            memory,
         };
 
         instance
     }
 
-    /// Get the snapshots
-    pub fn get_snapshots(&self) -> &Vec<Snapshot> {
-        &self.snapshots
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    /// Get the snapshot memory
+    pub fn get_memory(&self) -> SnapshotMemory {
+        self.memory.clone()
     }
 
     /// Get the snapshots
@@ -105,4 +114,10 @@ impl Filesystem {
         Snapshot::new(&name)
     }
 
+    pub fn purge_snapshot(&self) {
+        let driver = Driver::get_instance();
+
+    }
+
 }
+

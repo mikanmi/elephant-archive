@@ -14,8 +14,11 @@ const ZFS_LIST_FILESYSTEM: &str = "zfs list -H -o name -t filesystem";
 /// Command Line: show snapshots on this machine.
 const ZFS_LIST_SNAPSHOT: &str = "zfs list -H -s creation -o name -t snapshot";
 
-/// Command Line: take a snapshot on a ZFS filesystem.
+/// Command Line: take a snapshot recursively on a ZFS filesystem.
 const ZFS_TAKE_SNAPSHOT: &str = "zfs snapshot -r";
+
+/// Command Line: destroy a snapshot recursively on a ZFS filesystem.
+const ZFS_DESTROY_SNAPSHOT: &str = "zfs destroy -r";
 
 
 impl Driver {
@@ -49,6 +52,13 @@ impl Driver {
     /// `take_snapshot` function must be called by the root user.
     pub fn take_snapshot(&self, snapshot: &str) {
         let cl = format!("{ZFS_TAKE_SNAPSHOT} {snapshot}");
+        self.spawn(&cl);
+    }
+
+    /// Destroy the snapshot named with `snapshot`.
+    /// `destroy_snapshot` function must be called by the root user.
+    pub fn destroy_snapshot(&self, snapshot: &str) {
+        let cl = format!("{ZFS_DESTROY_SNAPSHOT} {snapshot}");
         self.spawn(&cl);
     }
 

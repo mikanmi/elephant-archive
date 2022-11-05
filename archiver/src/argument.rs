@@ -71,7 +71,7 @@ pub enum Command {
         dryrun: bool,
     },
     /// Show the existing snapshots on a ZFS filesystem.
-    ListSnapshot {
+    Show {
         /// The names of one or more ZFS filesystems.
         #[clap(required = true)]
         filesystem: Vec<String>,
@@ -110,7 +110,7 @@ impl Argument {
                     dryrun: dryrun.clone(),
                 }
             },
-            Command::ListSnapshot { filesystem, verbose, dryrun } => {
+            Command::Show { filesystem, verbose, dryrun } => {
                 Argument {
                     command: program.command.clone(),
                     filesystem: filesystem.clone(),

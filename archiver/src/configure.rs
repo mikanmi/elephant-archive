@@ -6,10 +6,10 @@
 pub const SNAPSHOT_PREFIX: &str = "elephant";
 
 /// Number of weekly snapshots keeping
-pub const SNAPSHOT_KEEP_WEEKS: i64 = 104;
+pub const SNAPSHOT_KEEP_WEEKS: i32 = 104;
 
 /// Number of daily snapshots keeping
-pub const SNAPSHOT_KEEP_DAYS: i64 = 30;
+pub const SNAPSHOT_KEEP_DAYS: i32 = 30;
 
 /// Number of hourly snapshots keeping
-pub const SNAPSHOT_KEEP_HOURS: i64 = 24;
+pub const SNAPSHOT_KEEP_HOURS: i32 = 24;

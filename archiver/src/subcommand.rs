@@ -3,7 +3,7 @@
 // Elephant Archive is licensed under BSD 2-Clause License.
 
 use crate::argument::{Argument, Command};
-use crate::zfs::Filesystem;
+use crate::zfs::{Filesystem, Snapshot};
 
 pub struct SnapshotCommand;
 pub struct ShowCommand;
@@ -54,29 +54,20 @@ pub fn from(command: &Command) -> Box<dyn SubCommand> {
     subcommand
 }
 
-impl SnapshotCommand {
-    fn purge(&self, filesystem: Filesystem) -> Result<(), String> {
-        let memory = filesystem.get_memory();
-
-        Ok(())
-    }
-}
-
 impl SubCommand for SnapshotCommand {
 
     fn run(&self) -> Result<(), String> {
-
         let args = Argument::global();
         let fs_names = &args.filesystem;
 
         // display the snapshots every the filesystem.
         for fs_name in fs_names {
-            let filesystem = Filesystem::from(fs_name)?;
+            let mut filesystem = Filesystem::from(fs_name)?;
             let snapshot = filesystem.take_snapshot();
-
-            self.purge(filesystem)?;
-
             elephant_log::display!("Taken a snapshot: {}", snapshot.name());
+
+            let destroys = filesystem.purge_snapshots();
+            elephant_log::display!("Destroy snapshots: {:?}", destroys);
         }
 
         Ok(())
@@ -86,16 +77,17 @@ impl SubCommand for SnapshotCommand {
 impl SubCommand for ShowCommand {
 
     fn run(&self) -> Result<(), String> {
-
         let args = Argument::global();
         let filesystems = &args.filesystem;
 
         // display the snapshots every the filesystem.
         for filesystem in filesystems {
             let filesystem = Filesystem::from(filesystem)?;
-            let snapshots = filesystem.get_memory();
 
-            elephant_log::display!("Snapshots: {:?}", snapshots);
+            let snapshots = filesystem.snapshots();
+            let generation = Snapshot::generation(&snapshots);
+
+            elephant_log::display!("Snapshots: {:?}", generation);
         }
 
         Ok(())

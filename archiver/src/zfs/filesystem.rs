@@ -177,12 +177,12 @@ impl SnapshotCollector {
         let generation = Snapshot::generation(&self.snapshots);
         let mut destroys: Vec<Snapshot> = Vec::new();
 
-        let offset = Duration::hours(1);
+        let offset = Duration::days(1);
         let mut middles = 
                 self.find_frequent_snapshot(&generation.middle, offset);
         destroys.append(&mut middles);
 
-        let offset = Duration::days(1);
+        let offset = Duration::weeks(1);
         let mut olds = 
                 self.find_frequent_snapshot(&generation.old, offset);
         destroys.append(&mut olds);
@@ -231,7 +231,7 @@ impl SnapshotCollector {
                 base = dt + interval;
             }
             else {
-                elephant_log::info!("destroy: {}, earliest: {}", snapshot.name(), base);
+                elephant_log::info!("find: {}, with base: {}", snapshot.name(), base);
                 destroys.push(snapshot.clone());
             }
         }
@@ -262,6 +262,7 @@ impl SnapshotCollector {
             index += 1;
         }
 
+        elephant_log::trace!("found oldest snapshot: {:?}", destroys);
         destroys
     }
 }

@@ -62,20 +62,22 @@ impl Snapshot {
         let days_duration = Duration::days(configure::SNAPSHOT_KEEP_DAYS  as i64);
 
         let local: DateTime<Local> = Local::now();
-        let hours_limit = local + hours_duration;
-        let days_limit = local + days_duration;
+        let hours_limit = local - hours_duration;
+        let days_limit = local - days_duration;
+
+        elephant_log::debug!("{} ## {}", hours_limit, hours_duration);
 
         let young: Vec<Snapshot> = snapshots.iter()
-                .filter(|s| s.get_datetime() < hours_limit)
+                .filter(|s| s.get_datetime() > hours_limit)
                 .cloned().collect();
         let middle: Vec<Snapshot> = snapshots.iter()
                 .filter(|s| {
                     let dt = s.get_datetime();
-                    dt >= hours_limit && dt < days_limit
+                    dt <= hours_limit && dt > days_limit
                 })
                 .cloned().collect();
         let old: Vec<Snapshot> = snapshots.iter()
-                .filter(|s| s.get_datetime() >= days_limit)
+                .filter(|s| s.get_datetime() <= days_limit)
                 .cloned().collect();
 
         elephant_log::debug!("young: {:?}", young);

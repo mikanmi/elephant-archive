@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Variables
-DIRECTORY=./temporary/
+DIRECTORY=~/temporary/
 
 ZFS_POOL_NAME=zfs_pool
 ENCRYPTED_POOL_NAME=encrypted_pool

@@ -98,6 +98,14 @@ impl Filesystem {
         Ok(Self::new(name))
     }
 
+    /// Archive a ZFS filesystem to a ZFS filesystem containing replications.
+    /// # Arguments
+    /// - `replication` - An array of snapshot instance that will be destroyed.
+    /// - `original` - An interval time to keep `snapshots`.
+    pub fn archive(replication: &mut Filesystem, original: &Filesystem) {
+
+    }
+
     /// Create a ZFS filesystem instance from `name`.
     fn new(name: &str) -> Filesystem {
         let controller = SnapshotCollector::new(name);
@@ -110,21 +118,22 @@ impl Filesystem {
         instance
     }
 
-    #[allow(dead_code)]
     pub fn name(&self) -> String {
         self.name.clone()
     }
 
+    // Get the snapshot instances
     pub fn snapshots(&self) -> Vec<Snapshot> {
         self.controller.snapshots()
     }
 
-    /// Get the snapshots
+    /// Take a snapshot
     pub fn take_snapshot(&mut self) -> Snapshot {
         let snapshot = self.controller.take();
         snapshot
     }
 
+    // Purge the some snapshots
     pub fn purge_snapshots(&mut self) -> Vec<Snapshot> {
         let destroys = self.controller.purge();
         destroys
@@ -213,19 +222,9 @@ impl SnapshotCollector {
 
         let mut base = Local.timestamp_millis(0);
 
-        // let destroys: Vec<Snapshot> = snapshots
-        //         .iter()
-        //         .filter(|s| {
-        //             let dt = s.get_datetime();
-        //             let keep = dt >= base;
-        //             base = dt + interval;
-        //             keep
-        //         }
-        // ).cloned().collect();
-
         let mut destroys = Vec::new();
         for snapshot in snapshots.iter() {
-            let dt = snapshot.get_datetime();
+            let dt = snapshot.datetime();
             if dt >= base {
                 // keep the current snapshot.
                 base = dt + interval;

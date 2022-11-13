@@ -5,23 +5,11 @@
 use crate::argument::{Argument, Command};
 use crate::zfs::{Filesystem, Snapshot};
 
-pub struct SnapshotCommand;
-pub struct ShowCommand;
-
 pub trait SubCommand {
 
     /// Confirm the ZFS filesystems of the command options are accessible or not.
     fn accessible_filesystem(&self) -> Result<(), String> {
-        let args = Argument::global();
-        let filesystems = &args.filesystem;
-
-        let f = filesystems.iter().find(|x|!Filesystem::exist(x));
-        let result = match f {
-            Some(filesystem) => Err(format!("The '{filesystem}' ZFS filesystem is not found")),
-            None => Ok(()),
-        };
-
-        result
+        self.accessible_filesystem_default()
     }
 
     fn launch(&self) -> Result<(), String> {
@@ -35,6 +23,21 @@ pub trait SubCommand {
         elephant_log::error!("SubCommand::run called");
         Err(String::from("SubCommand::run called"))
     }
+
+    /// Confirm the ZFS filesystems of the command options are accessible or not.
+    fn accessible_filesystem_default(&self) -> Result<(), String> {
+        let args = Argument::global();
+        let filesystems = &args.filesystem;
+
+        let f = filesystems.iter().find(|x|!Filesystem::exist(x));
+        let result = match f {
+            Some(filesystem) => Err(format!("The '{filesystem}' ZFS filesystem is not found")),
+            None => Ok(()),
+        };
+
+        result
+    }
+
 }
 
 pub fn from(command: &Command) -> Box<dyn SubCommand> {
@@ -45,6 +48,9 @@ pub fn from(command: &Command) -> Box<dyn SubCommand> {
         Command::Snapshot { .. } => {
             Box::new( SnapshotCommand {} )
         },
+        Command::Purge { .. } => {
+            Box::new( PurgeCommand {} )
+        },
         Command::Show { .. } => {
             Box::new( ShowCommand {} )
         },
@@ -54,7 +60,21 @@ pub fn from(command: &Command) -> Box<dyn SubCommand> {
     subcommand
 }
 
-impl SubCommand for SnapshotCommand {
+pub struct ArchiveCommand;
+
+impl SubCommand for ArchiveCommand {
+
+    fn accessible_filesystem(&self) -> Result<(), String> {
+        SubCommand::accessible_filesystem_default(self)?;
+
+        let args = Argument::global();
+        let archive = &args.archive;
+        let result = if Filesystem::exist(archive)
+            { Ok(()) } else 
+            { Err(format!("The '{archive}' ZFS filesystem is not found")) };
+
+        result
+    }
 
     fn run(&self) -> Result<(), String> {
         let args = Argument::global();
@@ -63,9 +83,43 @@ impl SubCommand for SnapshotCommand {
         // display the snapshots every the filesystem.
         for fs_name in fs_names {
             let mut filesystem = Filesystem::from(fs_name)?;
+
+        }
+
+        Ok(())
+    }
+}
+
+pub struct SnapshotCommand;
+
+impl SubCommand for SnapshotCommand {
+
+    fn run(&self) -> Result<(), String> {
+        let args = Argument::global();
+        let fs_names = &args.filesystem;
+
+        // take a snapshot every the filesystems.
+        for fs_name in fs_names {
+            let mut filesystem = Filesystem::from(fs_name)?;
             let snapshot = filesystem.take_snapshot();
             elephant_log::display!("Taken a snapshot: {}", snapshot.name());
+        }
 
+        Ok(())
+    }
+}
+
+pub struct PurgeCommand;
+
+impl SubCommand for PurgeCommand {
+
+    fn run(&self) -> Result<(), String> {
+        let args = Argument::global();
+        let fs_names = &args.filesystem;
+
+        // purge some snapshots every the filesystems.
+        for fs_name in fs_names {
+            let mut filesystem = Filesystem::from(fs_name)?;
             let destroys = filesystem.purge_snapshots();
             elephant_log::display!("Destroy snapshots: {:?}", destroys);
         }
@@ -74,20 +128,35 @@ impl SubCommand for SnapshotCommand {
     }
 }
 
+pub struct ShowCommand;
+
 impl SubCommand for ShowCommand {
 
     fn run(&self) -> Result<(), String> {
         let args = Argument::global();
         let filesystems = &args.filesystem;
 
-        // display the snapshots every the filesystem.
+        // display the snapshots every the filesystems.
         for filesystem in filesystems {
             let filesystem = Filesystem::from(filesystem)?;
 
             let snapshots = filesystem.snapshots();
             let generation = Snapshot::generation(&snapshots);
 
-            elephant_log::display!("Snapshots: {:?}", generation);
+            elephant_log::display!("Young snapshots:");
+            for snapshot in generation.young {
+                elephant_log::display!("{}", snapshot.name());
+            }
+
+            elephant_log::display!("Middle snapshots:");
+            for snapshot in generation.middle {
+                elephant_log::display!("{}", snapshot.name());
+            }
+
+            elephant_log::display!("Old snapshots:");
+            for snapshot in generation.old {
+                elephant_log::display!("{}", snapshot.name());
+            }
         }
 
         Ok(())

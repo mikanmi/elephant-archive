@@ -38,7 +38,7 @@ impl Snapshot {
         self.name.clone()
     }
 
-    pub fn get_datetime(&self) -> DateTime<Local> {
+    pub fn datetime(&self) -> DateTime<Local> {
         let prefix = configure::SNAPSHOT_PREFIX;
 
         let now = Local::now();
@@ -65,19 +65,17 @@ impl Snapshot {
         let hours_limit = local - hours_duration;
         let days_limit = local - days_duration;
 
-        elephant_log::debug!("{} ## {}", hours_limit, hours_duration);
-
         let young: Vec<Snapshot> = snapshots.iter()
-                .filter(|s| s.get_datetime() > hours_limit)
+                .filter(|s| s.datetime() > hours_limit)
                 .cloned().collect();
         let middle: Vec<Snapshot> = snapshots.iter()
                 .filter(|s| {
-                    let dt = s.get_datetime();
+                    let dt = s.datetime();
                     dt <= hours_limit && dt > days_limit
                 })
                 .cloned().collect();
         let old: Vec<Snapshot> = snapshots.iter()
-                .filter(|s| s.get_datetime() <= days_limit)
+                .filter(|s| s.datetime() <= days_limit)
                 .cloned().collect();
 
         elephant_log::debug!("young: {:?}", young);

@@ -2,7 +2,7 @@
 // All rights reserved.
 // Elephant Archive is licensed under BSD 2-Clause License.
 
-use crate::argument::{Argument, Command};
+use crate::argument::{Argument, ArchiverCommand};
 use crate::zfs::{Filesystem, Snapshot};
 
 pub trait SubCommand {
@@ -40,18 +40,18 @@ pub trait SubCommand {
 
 }
 
-pub fn from(command: &Command) -> Box<dyn SubCommand> {
+pub fn from(command: &ArchiverCommand) -> Box<dyn SubCommand> {
 
     elephant_log::error!("{:?}", command);
 
     let subcommand: Box<dyn SubCommand> = match command {
-        Command::Snapshot { .. } => {
+        ArchiverCommand::Snapshot { .. } => {
             Box::new( SnapshotCommand {} )
         },
-        Command::Purge { .. } => {
+        ArchiverCommand::Purge { .. } => {
             Box::new( PurgeCommand {} )
         },
-        Command::Show { .. } => {
+        ArchiverCommand::Show { .. } => {
             Box::new( ShowCommand {} )
         },
         _ => { elephant_log::error!("Not Implemented yet"); panic!() },

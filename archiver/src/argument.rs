@@ -9,7 +9,7 @@ use clap::{Parser, Subcommand};
 
 #[derive(Debug)]
 pub struct Argument {
-    pub command: Command,
+    pub command: ArchiverCommand,
     pub filesystem: Vec<String>,
     pub archive: String,
     pub progress: bool,
@@ -20,6 +20,13 @@ pub struct Argument {
 #[derive(Debug)]
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
+#[command(help_template("\
+{before-help}{name} {version}
+{author-with-newline}{about-with-newline}
+{usage-heading} {usage}
+
+{all-args}{after-help}
+"))]
 pub struct Program {
     /// Optional name to operate on
     // pub name: Option<String>,
@@ -33,13 +40,13 @@ pub struct Program {
     // pub debug: u8,
 
     #[command(subcommand)]
-    pub command: Command,
+    pub command: ArchiverCommand,
 }
 
 #[derive(Clone)]
 #[derive(Debug)]
 #[derive(Subcommand)]
-pub enum Command {
+pub enum ArchiverCommand {
     /// Archive one or more ZFS filesystems to another ZFS filesystem.
     Archive {
         /// The names of one or more ZFS filesystems.
@@ -134,7 +141,7 @@ impl Argument {
         println!("{:?}", program);
 
         let argument = match &program.command {
-            Command::Archive { filesystem, archive, progress,
+            ArchiverCommand::Archive { filesystem, archive, progress,
                      verbose, dryrun } => {
                 Argument {
                     command: program.command.clone(),
@@ -145,9 +152,9 @@ impl Argument {
                     dryrun: dryrun.clone(),
                 }
             },
-            Command::Snapshot { filesystem, verbose, dryrun } |
-            Command::Purge { filesystem, verbose, dryrun } |
-            Command::Show { filesystem, verbose, dryrun }
+            ArchiverCommand::Snapshot { filesystem, verbose, dryrun } |
+            ArchiverCommand::Purge { filesystem, verbose, dryrun } |
+            ArchiverCommand::Show { filesystem, verbose, dryrun }
             => {
                 Argument {
                     command: program.command.clone(),
